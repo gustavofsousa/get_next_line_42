@@ -10,26 +10,40 @@ static int	str_is_empty(char *str)
 	return (*str == '\0');
 }
 
-// I'm using this to copy an intire string or part of the string (begin, end)
+int	ft_strlen(char *str)
+{
+	int	len;
+
+	len = 0;
+	while(str[len] != '\0' && str[len - 1] != '\n')
+		len++;
+	return (len);
+}
+
+void	strlcpy(char *dst, char *src, int len)
+{
+	int	i;
+
+	i = 0;
+	while (src[i] && (i < len - 1) && i < ft_strlen(src))
+	{
+		dst[i] = src[i];
+		i++;
+	}
+	dst[i] = 0;
+}
+
 static char	*ft_strdup(char *str)
 {
-	int		i;
 	char	*line;
-	int		end;
+	int		len;
 
-	//Find where string ends
-	end = 1;
-	while(str[end] != '\0' && str[end - 1] != '\n')
-			end++;
-	// Aloccate the good size
-	line = malloc(end + 1);
+	len = ft_strlen(str);//new
+	line = malloc(len + 1);
 	if (!line)
 		return (NULL);
-	i = -1;
-	// Does the copy.
-	while (++i < end)
-		line[i] = str[i];
-	line[i] = '\0';
+	strlcpy(line, str, len);
+	
 	return (line);
 }
 
@@ -37,25 +51,22 @@ static int		find_new_line(char *str)
 {
 	int	i;
 
-	i = -1;
-	while (str[++i])
-		if (str[i] == '\n')
-			return (i);
-	return (-1);
+	i = 0;
+	while (str[i] && str[i] != '\n')
+		i++;
+	return (i);
 }
 
-static char	*clean(char *str)
+static char	*clean(char *str, int pos)
 {
 	int	i;
 	int	j;
 	char	*new;
 
-	i = 0;
-	while (str[i] && str[i] != '\n')
-		i++;
+	i = find_new_line(str);
 	new = malloc(BUFFER_SIZE + 1);
 	j = 0;
-	//Check if there's a \n
+	//Check if stopped at \n
 	if (str[i++] == '\n')
 		while (str[i])
 			new[j++] = str[i++];
@@ -72,12 +83,8 @@ static char	*ft_append(char *s1, char *s2)
 	int		s2_len;
 	int		i;
 
-	s1_len = 0;
-	while (s1[s1_len])
-		s1_len++;
-	s2_len = 0;
-	while (s2[s2_len] && s2[s2_len - 1] != '\n')
-		s2_len++;
+	s1_len = ft_strlen(s1);//new
+	s2_len = ft_strlen(s2);//new
 	str = malloc(s1_len + s2_len + 1);
 	if (!str)
 		return (NULL);
@@ -110,8 +117,7 @@ char	*get_next_line(int fd)
 		{
 			line = ft_strdup(stash);
 			stash = clean(stash);
-			i_new_line = find_new_line(line);
-			if (i_new_line != -1)
+			if (find_new_line)
 				return (line);
 		}
 		nbyte = read(fd, stash, BUFFER_SIZE);
@@ -119,15 +125,12 @@ char	*get_next_line(int fd)
 		// Has read something.
 		if (nbyte > 0)
 		{
-			i_new_line = find_new_line(stash);
-			// If LINE is empty:
 			if (str_is_empty(line))
 				line = ft_strdup(stash);
-			// If there's sth in line:
 			else
 				line = ft_append(line, stash);
 			stash = clean(stash);
-			if (i_new_line != -1)
+			if (find_new_line)
 				return (line);
 		}
 		else
