@@ -33,6 +33,16 @@ void	strlcpy(char *dst, char *src, int len)
 	dst[i] = 0;
 }
 
+static void	*clean(char *str, int pos)
+{
+	int	j;
+
+	j = 0;
+	while (str[pos])
+		new[j++] = str[pos++];
+	new[j] = '\0';
+}
+
 static char	*ft_strdup(char *str)
 {
 	char	*line;
@@ -43,7 +53,7 @@ static char	*ft_strdup(char *str)
 	if (!line)
 		return (NULL);
 	strlcpy(line, str, len);
-	
+	clean(str, len + 1);
 	return (line);
 }
 
@@ -57,24 +67,6 @@ static int		find_new_line(char *str)
 	return (i);
 }
 
-static char	*clean(char *str, int pos)
-{
-	int	i;
-	int	j;
-	char	*new;
-
-	i = find_new_line(str);
-	new = malloc(BUFFER_SIZE + 1);
-	j = 0;
-	//Check if stopped at \n
-	if (str[i++] == '\n')
-		while (str[i])
-			new[j++] = str[i++];
-	new[j] = '\0';
-	free(str);
-	return (new);
-
-}
 
 static char	*ft_append(char *s1, char *s2)
 {
@@ -87,18 +79,12 @@ static char	*ft_append(char *s1, char *s2)
 	s2_len = ft_strlen(s2);//new
 	str = malloc(s1_len + s2_len + 1);
 	if (!str)
-		return (NULL);
-	i = -1;
-	while (s1[++i])
-		str[i] = s1[i];
-	i = -1;
-	while (++i < s2_len)
-		str[s1_len + i] = s2[i];
-	str[s1_len + i] = '\0';
+		return (NULL);	
+	ft_strlcpy(str, s1, s1_len + 1);
+	ft_strlcpy(&str[s1_len], s2, s2_len + 1);
 	free(s1);
 	return (str);
 }
-
 
 char	*get_next_line(int fd)
 {
