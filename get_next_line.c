@@ -82,6 +82,7 @@ static char	*ft_append(char *s1, char *s2)
 		return (NULL);	
 	ft_strlcpy(str, s1, s1_len + 1);
 	ft_strlcpy(&str[s1_len], s2, s2_len + 1);
+	clean(s2);
 	free(s1);
 	return (str);
 }
@@ -91,7 +92,6 @@ char	*get_next_line(int fd)
 	static char	*stash;
 	char		*line;
 	int			nbyte;
-	int			i_new_line;
 
 	if (!stash)
 		stash = malloc(BUFFER_SIZE + 1);
