@@ -11,14 +11,14 @@ int main()
 	char	*str;
 	int i = 0;
 
-	fd = open("text", O_RDONLY, 0);
+	fd = open("teste1.txt", O_RDONLY, 0);
     ///do
-	while (i++ < 3)
+	while (i++ < 11)
 	{
 		str = get_next_line(fd);   	
-		free(str);
+		//free(str);
+    	printf("%s", str);
 	}
-    printf("%s", str);
 	 close(fd);
      return (0);
  }

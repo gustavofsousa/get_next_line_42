@@ -14,13 +14,13 @@ int	ft_strlen(char *str)
 {
 	int	len;
 
-	len = 0;
-	while(str[len] != '\0' && str[len - 1] != '\n')
+	len = 1;
+	while (str[len] && str[len - 1] != '\n')
 		len++;
 	return (len);
 }
 
-void	strlcpy(char *dst, char *src, int len)
+void	ft_strlcpy(char *dst, char *src, int len)
 {
 	int	i;
 
@@ -33,58 +33,49 @@ void	strlcpy(char *dst, char *src, int len)
 	dst[i] = 0;
 }
 
-static void	*clean(char *str, int pos)
+static void	clean(char *str, int pos)
 {
 	int	j;
-
+	
 	j = 0;
 	while (str[pos])
-		new[j++] = str[pos++];
-	new[j] = '\0';
+		str[j++] = str[pos++];
+	str[j] = '\0';
 }
 
-static char	*ft_strdup(char *str)
+static int ft_strdup(char **dst, char *src)
 {
 	char	*line;
 	int		len;
 
-	len = ft_strlen(str);//new
+	len = ft_strlen(src);
 	line = malloc(len + 1);
 	if (!line)
-		return (NULL);
-	strlcpy(line, str, len);
-	clean(str, len + 1);
-	return (line);
+		return (0);
+	ft_strlcpy(line, src, len + 1);
+	free(*dst);
+	*dst = line;
+	clean(src, len);
+	return (len);
 }
 
-static int		find_new_line(char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i] && str[i] != '\n')
-		i++;
-	return (i);
-}
-
-
-static char	*ft_append(char *s1, char *s2)
+static int	ft_append(char *s1, char *s2)
 {
 	char	*str;
 	int		s1_len;
 	int		s2_len;
-	int		i;
 
-	s1_len = ft_strlen(s1);//new
-	s2_len = ft_strlen(s2);//new
+	s1_len = ft_strlen(s1);
+	s2_len = ft_strlen(s2);
 	str = malloc(s1_len + s2_len + 1);
 	if (!str)
-		return (NULL);	
+		return (0);	
 	ft_strlcpy(str, s1, s1_len + 1);
 	ft_strlcpy(&str[s1_len], s2, s2_len + 1);
-	clean(s2);
+	clean(s2, s2_len);
 	free(s1);
-	return (str);
+	s1 = str;
+	return (s2_len);
 }
 
 char	*get_next_line(int fd)
@@ -92,18 +83,17 @@ char	*get_next_line(int fd)
 	static char	*stash;
 	char		*line;
 	int			nbyte;
+	int			pos_new_line;
 
 	if (!stash)
 		stash = malloc(BUFFER_SIZE + 1);
 	line = 0;
 	while (1)
 	{
-		// If nbyte has come from another lap.
 		if (!str_is_empty(stash))
 		{
-			line = ft_strdup(stash);
-			stash = clean(stash);
-			if (find_new_line)
+			pos_new_line = ft_strdup(&line, stash);
+			if (pos_new_line)
 				return (line);
 		}
 		nbyte = read(fd, stash, BUFFER_SIZE);
@@ -112,11 +102,10 @@ char	*get_next_line(int fd)
 		if (nbyte > 0)
 		{
 			if (str_is_empty(line))
-				line = ft_strdup(stash);
+				pos_new_line = ft_strdup(&line, stash);
 			else
-				line = ft_append(line, stash);
-			stash = clean(stash);
-			if (find_new_line)
+				pos_new_line = ft_append(line, stash);
+			if (pos_new_line)
 				return (line);
 		}
 		else
