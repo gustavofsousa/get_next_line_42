@@ -11,7 +11,7 @@ int main()
 	char	*str;
 	int i = 0;
 
-	fd = open("teste1.txt", O_RDONLY, 0);
+	fd = open("odisseia.txt", O_RDONLY, 0);
     ///do
 	while (i++ < 11)
 	{

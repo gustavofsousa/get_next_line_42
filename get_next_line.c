@@ -43,39 +43,50 @@ static void	clean(char *str, int pos)
 	str[j] = '\0';
 }
 
-static int ft_strdup(char **dst, char *src)
+static int ft_strdup(char **line, char *src)
 {
-	char	*line;
+	char	*new;
 	int		len;
 
 	len = ft_strlen(src);
-	line = malloc(len + 1);
+	new = malloc(len + 1);
 	if (!line)
 		return (0);
-	ft_strlcpy(line, src, len + 1);
-	free(*dst);
-	*dst = line;
+	ft_strlcpy(new, src, len + 1);
+	free(*line);
+	*line = new;
 	clean(src, len);
 	return (len);
 }
 
-static int	ft_append(char *s1, char *s2)
+static int	ft_append(char **line, char *s2)
 {
-	char	*str;
-	int		s1_len;
+	char	*new;
+	int		line_len;
 	int		s2_len;
 
-	s1_len = ft_strlen(s1);
+	line_len = ft_strlen(*line);
 	s2_len = ft_strlen(s2);
-	str = malloc(s1_len + s2_len + 1);
-	if (!str)
+	new = malloc(line_len + s2_len + 1);
+	if (!new)
 		return (0);	
-	ft_strlcpy(str, s1, s1_len + 1);
-	ft_strlcpy(&str[s1_len], s2, s2_len + 1);
+	ft_strlcpy(new, *line, line_len + 1);
+	ft_strlcpy(&new[line_len], s2, s2_len + 1);
 	clean(s2, s2_len);
-	free(s1);
-	s1 = str;
+	free(*line);
+	*line = new;
 	return (s2_len);
+}
+
+char	*ft_strchr(char *str, char c)
+{
+	while (*str != c)
+	{
+		if (*str == '\0')
+			return (NULL);
+		str++;
+	}
+	return (str);
 }
 
 char	*get_next_line(int fd)
@@ -93,19 +104,19 @@ char	*get_next_line(int fd)
 		if (!str_is_empty(stash))
 		{
 			pos_new_line = ft_strdup(&line, stash);
-			if (pos_new_line)
+			if (ft_strchr(line, '\n'))
 				return (line);
 		}
 		nbyte = read(fd, stash, BUFFER_SIZE);
-		stash[nbyte + 1] = '\0';
+		stash[nbyte] = '\0';
 		// Has read something.
 		if (nbyte > 0)
 		{
 			if (str_is_empty(line))
 				pos_new_line = ft_strdup(&line, stash);
 			else
-				pos_new_line = ft_append(line, stash);
-			if (pos_new_line)
+				pos_new_line = ft_append(&line, stash);
+			if (ft_strchr(line, '\n'))
 				return (line);
 		}
 		else
