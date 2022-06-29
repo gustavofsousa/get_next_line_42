@@ -16,8 +16,8 @@ int main()
 	while (i++ < 11)
 	{
 		str = get_next_line(fd);   	
-		//free(str);
     	printf("%s", str);
+		free(str);
 	}
 	 close(fd);
      return (0);
