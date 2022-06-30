@@ -1,31 +1,46 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gusousa <gusousa@student.42.rio>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/06/29 15:09:48 by gusousa           #+#    #+#             */
+/*   Updated: 2022/06/30 09:23:13 by gusousa          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 
-static int	str_is_empty(char *str)
-{
-	if (!str)
-		return (1);
-	return (*str == '\0');
-}
-
-int	ft_strlen(char *str)
+int	ft_strlen(char *str, int *end_flag)
 {
 	int	len;
 
-	len = 1;
-	while (str[len] && str[len - 1] != '\n')
+	len = 0;
+	*end_flag = 1;
+	while (str[len])
+	{
+		if (str[len] == '\n')
+			return (len + 1);
 		len++;
+	}
+	*end_flag = 0;
 	return (len);
 }
 
-void	ft_strlcpy(char *dst, char *src, int len)
+void	ft_strlcpy(char *dst, char *src, int size)
 {
 	int	i;
+	int	len_src;
 
 	i = 0;
-	while (src[i] && (i < len - 1) && i < ft_strlen(src))
+	len_src = 0;
+	while (src[len_src])
+		len_src++;
+	while (src[i] && (i < size - 1) && i < len_src)
 	{
 		dst[i] = src[i];
 		i++;
@@ -43,48 +58,36 @@ static void	clean(char *str, int pos)
 	str[j] = '\0';
 }
 
-static char *ft_strdup(char *line, char *src)
+static char *ft_strdup(char *line, char *src, int len_stash)
 {
 	char	*new;
-	int		len;
 
-	len = ft_strlen(src);
-	new = malloc(len + 1);
+	new = malloc(len_stash + 1);
 	if (!new)
 		return (0);
-	ft_strlcpy(new, src, len + 1);
+	ft_strlcpy(new, src, len_stash + 1);
 	free(line);
-	clean(src, len);
+	clean(src, len_stash);
 	return (new);
 }
 
-static char	*ft_append(char *line, char *s2)
+static char	*ft_append(char *line, char *s2, int len_stash)
 {
 	char	*new;
 	int		line_len;
-	int		s2_len;
 
-	line_len = ft_strlen(line);
-	s2_len = ft_strlen(s2);
-	new = malloc(line_len + s2_len + 1);
+	line_len = 0;
+	while (line[line_len])
+		line_len++;
+//	line_len = ft_strlen(line);//Se quiser pode substituir isso por uma estática.
+	new = malloc(line_len + len_stash + 1);
 	if (!new)
-		return (0);	
+		return (0);
 	ft_strlcpy(new, line, line_len + 1);
-	ft_strlcpy(&new[line_len], s2, s2_len + 1);
-	clean(s2, s2_len);
+	ft_strlcpy(&new[line_len], s2, len_stash + 1);
+	clean(s2, len_stash);
 	free(line);
 	return (new);
-}
-
-char	*ft_strchr(char *str, char c)
-{
-	while (*str != c)
-	{
-		if (*str == '\0')
-			return (NULL);
-		str++;
-	}
-	return (str);
 }
 
 char	*get_next_line(int fd)
@@ -92,16 +95,21 @@ char	*get_next_line(int fd)
 	static char	*stash;
 	char		*line;
 	int			nbyte;
+	int			end_flag;
+	int			len_stash;
 
 	if (!stash)
-		stash = calloc(BUFFER_SIZE + 1, 1);
+		stash = calloc(BUFFER_SIZE + 1, 1);//Fazer a função aquiii
 	line = 0;
+	line = calloc(BUFFER_SIZE + 1, 1);
+	end_flag = 1;
 	while (1)
 	{
-		if (!str_is_empty(stash))
+		if (stash[0] != '\0')
 		{
-			line = ft_strdup(line, stash);
-			if (ft_strchr(line, '\n'))
+			len_stash = ft_strlen(stash, &end_flag);
+			line = ft_strdup(line, stash, len_stash);
+			if (end_flag)
 				return (line);
 		}
 		nbyte = read(fd, stash, BUFFER_SIZE);
@@ -109,11 +117,12 @@ char	*get_next_line(int fd)
 		// Has read something.
 		if (nbyte > 0)
 		{
-			if (str_is_empty(line))
-				line = ft_strdup(line, stash);
+			len_stash = ft_strlen(stash, &end_flag);
+			if (line[0] == '\0')
+				line = ft_strdup(line, stash, len_stash);
 			else
-				line = ft_append(line, stash);
-			if (ft_strchr(line, '\n'))
+				line = ft_append(line, stash, len_stash);
+			if (end_flag)
 				return (line);
 		}
 		else
