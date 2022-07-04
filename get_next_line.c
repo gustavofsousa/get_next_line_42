@@ -6,10 +6,9 @@
 /*   By: gusousa <gusousa@student.42.rio>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/29 15:09:48 by gusousa           #+#    #+#             */
-/*   Updated: 2022/06/30 09:23:13 by gusousa          ###   ########.fr       */
+/*   Updated: 2022/07/04 13:23:44 by gusousa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -48,17 +47,17 @@ void	ft_strlcpy(char *dst, char *src, int size)
 	dst[i] = 0;
 }
 
-static void	clean(char *str, int pos)
+static void	move_remains(char *str, int pos)
 {
 	int	j;
-	
+
 	j = 0;
 	while (str[pos])
 		str[j++] = str[pos++];
 	str[j] = '\0';
 }
 
-static char *ft_strdup(char *line, char *src, int len_stash)
+static char	*ft_strdup(char *src, int len_stash)
 {
 	char	*new;
 
@@ -66,8 +65,7 @@ static char *ft_strdup(char *line, char *src, int len_stash)
 	if (!new)
 		return (0);
 	ft_strlcpy(new, src, len_stash + 1);
-	free(line);
-	clean(src, len_stash);
+	move_remains(src, len_stash);
 	return (new);
 }
 
@@ -79,54 +77,70 @@ static char	*ft_append(char *line, char *s2, int len_stash)
 	line_len = 0;
 	while (line[line_len])
 		line_len++;
-//	line_len = ft_strlen(line);//Se quiser pode substituir isso por uma estática.
 	new = malloc(line_len + len_stash + 1);
 	if (!new)
 		return (0);
 	ft_strlcpy(new, line, line_len + 1);
 	ft_strlcpy(&new[line_len], s2, len_stash + 1);
-	clean(s2, len_stash);
+	move_remains(s2, len_stash);
 	free(line);
 	return (new);
 }
 
+char	*ft_calloc(size_t n_elements, size_t size)
+{
+	size_t	i;
+	char	*str;
+
+	if (!n_elements || !size)
+	{
+		n_elements = 1;
+		size = 1;
+	}
+	str = malloc(n_elements * size);
+	if (!str)
+		return (NULL);
+	i = -1;
+	while (++i < n_elements * size)
+		str[i] = 0;
+	return (str);
+}
+
+char	*divide_et_vince(int fd, char *line, char *stash)
+{
+	int	nbyte;
+	int	end_flag;
+	int	len_stash;
+
+	end_flag = 0;
+	if (stash[0] != '\0')
+	{
+		len_stash = ft_strlen(stash, &end_flag);
+		line = ft_strdup(stash, len_stash);
+	}
+	while (end_flag == 0)
+	{
+		nbyte = read(fd, stash, BUFFER_SIZE);
+		if (nbyte <= 0 && *stash == 0)
+			break ;
+		stash[nbyte] = '\0';
+		len_stash = ft_strlen(stash, &end_flag);
+		if (line == 0)
+			line = ft_strdup(stash, len_stash);
+		else
+			line = ft_append(line, stash, len_stash);
+	}
+	return (line);
+}
+
 char	*get_next_line(int fd)
 {
-	static char	*stash;
+	static char	stash[BUFFER_SIZE + 1];
 	char		*line;
-	int			nbyte;
-	int			end_flag;
-	int			len_stash;
 
-	if (!stash)
-		stash = calloc(BUFFER_SIZE + 1, 1);//Fazer a função aquiii
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (0);
 	line = 0;
-	line = calloc(BUFFER_SIZE + 1, 1);
-	end_flag = 1;
-	while (1)
-	{
-		if (stash[0] != '\0')
-		{
-			len_stash = ft_strlen(stash, &end_flag);
-			line = ft_strdup(line, stash, len_stash);
-			if (end_flag)
-				return (line);
-		}
-		nbyte = read(fd, stash, BUFFER_SIZE);
-		stash[nbyte] = '\0';
-		// Has read something.
-		if (nbyte > 0)
-		{
-			len_stash = ft_strlen(stash, &end_flag);
-			if (line[0] == '\0')
-				line = ft_strdup(line, stash, len_stash);
-			else
-				line = ft_append(line, stash, len_stash);
-			if (end_flag)
-				return (line);
-		}
-		else
-			return (line);
-	
-	}
+	line = divide_et_vince(fd, line, stash);
+	return (line);
 }

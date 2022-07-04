@@ -7,13 +7,14 @@ char	*get_next_line(int fd);
 
 int main()
  {
-     int fd;
+    int		fd;
 	char	*str;
-	int i = 0;
+	int		i;
 
-	fd = open("teste1.txt", O_RDONLY, 0);
+	fd = open("sonic.txt", O_RDONLY, 0);
     ///do
-	while (i++ < 2)
+	i = 0;
+	while (i++ < 3)
 	{
 		str = get_next_line(fd);   	
     	printf("%s", str);
