@@ -6,13 +6,13 @@
 /*   By: gusousa <gusousa@student.42.rio>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/30 12:49:32 by gusousa           #+#    #+#             */
-/*   Updated: 2022/07/05 09:35:25 by gusousa          ###   ########.fr       */
+/*   Updated: 2023/05/23 10:12:26 by gusousa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-int	ft_strlen(char *str, int *end_flag)
+int	ft_strlen_gnl(char *str, int *end_flag)
 {
 	int	len;
 
@@ -28,7 +28,7 @@ int	ft_strlen(char *str, int *end_flag)
 	return (len);
 }
 
-char	*ft_calloc(size_t n_elements, size_t size)
+char	*ft_calloc_gnl(size_t n_elements, size_t size)
 {
 	size_t	i;
 	char	*str;
@@ -47,7 +47,7 @@ char	*ft_calloc(size_t n_elements, size_t size)
 	return (str);
 }
 
-void	ft_strlcpy(char *dst, char *src, int size)
+void	ft_strlcpy_gnl(char *dst, char *src, int size)
 {
 	int	i;
 	int	len_src;
@@ -64,14 +64,14 @@ void	ft_strlcpy(char *dst, char *src, int size)
 	dst[i] = 0;
 }
 
-char	*ft_strdup(char *src, int len_stash)
+char	*ft_strdup_gnl(char *src, int len_stash)
 {
 	char	*new;
 
 	new = malloc(len_stash + 1);
 	if (!new)
 		return (0);
-	ft_strlcpy(new, src, len_stash + 1);
+	ft_strlcpy_gnl(new, src, len_stash + 1);
 	move_remains(src, len_stash);
 	return (new);
 }

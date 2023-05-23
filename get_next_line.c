@@ -6,7 +6,7 @@
 /*   By: gusousa <gusousa@student.42.rio>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/29 15:09:48 by gusousa           #+#    #+#             */
-/*   Updated: 2022/07/05 09:06:46 by gusousa          ###   ########.fr       */
+/*   Updated: 2023/05/23 10:08:20 by gusousa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ char	*ft_append(char *line, char *s2, int len_stash)
 	new = malloc(line_len + len_stash + 1);
 	if (!new)
 		return (0);
-	ft_strlcpy(new, line, line_len + 1);
-	ft_strlcpy(&new[line_len], s2, len_stash + 1);
+	ft_strlcpy_gnl(new, line, line_len + 1);
+	ft_strlcpy_gnl(&new[line_len], s2, len_stash + 1);
 	move_remains(s2, len_stash);
 	free(line);
 	return (new);
@@ -49,8 +49,8 @@ char	*divide_et_vince(int fd, char *line, char *stash)
 	end_flag = 0;
 	if (stash[0] != '\0')
 	{
-		len_stash = ft_strlen(stash, &end_flag);
-		line = ft_strdup(stash, len_stash);
+		len_stash = ft_strlen_gnl(stash, &end_flag);
+		line = ft_strdup_gnl(stash, len_stash);
 	}
 	while (end_flag == 0)
 	{
@@ -58,9 +58,9 @@ char	*divide_et_vince(int fd, char *line, char *stash)
 		if (nbyte <= 0 && *stash == 0)
 			break ;
 		stash[nbyte] = '\0';
-		len_stash = ft_strlen(stash, &end_flag);
+		len_stash = ft_strlen_gnl(stash, &end_flag);
 		if (line == 0)
-			line = ft_strdup(stash, len_stash);
+			line = ft_strdup_gnl(stash, len_stash);
 		else
 			line = ft_append(line, stash, len_stash);
 	}
